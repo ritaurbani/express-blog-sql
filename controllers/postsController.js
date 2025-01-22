@@ -18,11 +18,18 @@ const index = (req, res) => {
         }
     })
 }
+//Far sì che la SHOW restituisca il post comprensivo di tag, recuperandoli grazie alla relazione tra post e tags, esistente sul database
 
 //Show - get
 const show = (req, res) => {
     const id = req.params.id 
     const sql = "SELECT * FROM `posts` WHERE id = ? "
+    const tagSql = `
+    SELECT tags.*
+    FROM tags
+    JOIN posts
+    ON tags.id = posts.id
+    WHERE posts.id = 1`
     connection.query(sql, [id], (err, posts) => {
         if(err) {
             return res.status(500).json({
@@ -33,10 +40,25 @@ const show = (req, res) => {
             message: "Post non trovato"
           })  
         } else {
-            return res.status(200).json({
+            //quando mi arriva risultato faccio seconda query
+            connection.query(tagSql, [id], (err, tags) => {
+                if(err) {
+                    return res.status(500).json({
+                    message: "Errore interno al server"
+                    })
+                } 
+                //voglio ritornare sia tags che posts
+                const postsTags = {
+                    ...posts[0],
+                    tags: tags,
+                }
+                
+                return res.status(200).json({
                 status: "success",
-                data: posts[0],
+                data: postsTags,
             });
+            })
+           
         }
     });
 };
