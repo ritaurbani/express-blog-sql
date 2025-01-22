@@ -17,7 +17,6 @@ const index = (req, res) => {
             })
         }
     })
-
 }
 
 //Show - get
@@ -56,8 +55,20 @@ const show = (req, res) => {
 
 //Destroy - delete
 const destroy = (req, res) => {
-    
-}
+    const id = req.params.id;
+
+    const sql = "DELETE FROM `posts` WHERE id = ?" ;
+
+    connection.query(sql, [id], (err) => {
+        if(err) {
+            return res.status(500).json({
+                message: "errore interno al server"
+            })
+        } else {
+            return res.sendStatus(204);
+        }
+    }) 
+};
 
 module.exports = {
     index,
